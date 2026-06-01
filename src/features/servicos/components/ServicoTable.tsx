@@ -4,6 +4,12 @@ import { Table } from "../../../components/ui/Table";
 import { formatCurrency } from "../../../lib/formatters";
 import type { Servico } from "../types/servico";
 
+const tipoLabelMap: Record<Servico["tipo"], string> = {
+  barba: "Barba",
+  cabelo: "Cabelo",
+  bigode: "Bigode",
+};
+
 type ServicoTableProps = {
   servicos: Servico[];
   onEdit: (servico: Servico) => void;
@@ -16,6 +22,7 @@ export function ServicoTable({ servicos, onEdit, onDelete }: ServicoTableProps) 
       <thead className="bg-black/3 text-left text-sm text-black/60">
         <tr>
           <th className="px-4 py-3">Nome</th>
+          <th className="px-4 py-3">Tipo</th>
           <th className="px-4 py-3">Preço</th>
           <th className="px-4 py-3">Duração</th>
           <th className="px-4 py-3">Status</th>
@@ -29,6 +36,7 @@ export function ServicoTable({ servicos, onEdit, onDelete }: ServicoTableProps) 
               <div className="font-medium">{servico.nome}</div>
               <div className="text-black/55">{servico.descricao ?? "Sem descrição"}</div>
             </td>
+            <td className="px-4 py-4">{tipoLabelMap[servico.tipo]}</td>
             <td className="px-4 py-4">{formatCurrency(servico.preco)}</td>
             <td className="px-4 py-4">{servico.duracao_minutos} min</td>
             <td className="px-4 py-4">

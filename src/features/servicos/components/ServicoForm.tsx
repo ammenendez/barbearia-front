@@ -7,6 +7,12 @@ import { Textarea } from "../../../components/ui/Textarea";
 import { servicoSchema, type ServicoFormData } from "../schemas/servicoSchema";
 import type { Servico } from "../types/servico";
 
+const tipoOptions = [
+  { value: "barba", label: "Barba" },
+  { value: "cabelo", label: "Cabelo" },
+  { value: "bigode", label: "Bigode" },
+] as const;
+
 type ServicoFormProps = {
   initialData?: Servico | null;
   onSubmit: (data: ServicoFormData) => void;
@@ -16,9 +22,10 @@ type ServicoFormProps = {
 export function ServicoForm({ initialData, onSubmit, onCancel }: ServicoFormProps) {
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<ServicoFormData>({
     resolver: zodResolver(servicoSchema),
-    defaultValues: {
-      nome: "",
-      descricao: "",
+      defaultValues: {
+        tipo: "cabelo",
+        nome: "",
+        descricao: "",
       preco: 0,
       duracao_minutos: 0,
       ativo: true,
@@ -28,6 +35,7 @@ export function ServicoForm({ initialData, onSubmit, onCancel }: ServicoFormProp
   useEffect(() => {
     if (initialData) {
       reset({
+        tipo: initialData.tipo,
         nome: initialData.nome,
         descricao: initialData.descricao ?? "",
         preco: initialData.preco,
@@ -36,6 +44,7 @@ export function ServicoForm({ initialData, onSubmit, onCancel }: ServicoFormProp
       });
     } else {
       reset({
+        tipo: "cabelo",
         nome: "",
         descricao: "",
         preco: 0,
@@ -47,6 +56,18 @@ export function ServicoForm({ initialData, onSubmit, onCancel }: ServicoFormProp
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+      <label className="space-y-2 block">
+        <span className="text-sm font-medium">Tipo</span>
+        <select className="h-11 w-full rounded-xl border border-black/10 bg-white px-3 text-sm" {...register("tipo")}>
+          {tipoOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        {errors.tipo ? <p className="text-sm text-red-600">{errors.tipo.message}</p> : null}
+      </label>
+
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="space-y-2">
           <span className="text-sm font-medium">Nome</span>

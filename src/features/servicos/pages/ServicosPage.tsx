@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "../../../components/ui/Button";
 import { EmptyState } from "../../../components/ui/EmptyState";
@@ -10,16 +10,12 @@ import { ServicoTable } from "../components/ServicoTable";
 import type { Servico } from "../types/servico";
 import type { ServicoFormData } from "../schemas/servicoSchema";
 
-const mockServicos: Servico[] = [
-  { id: 1, nome: "Corte tradicional", descricao: "Corte masculino clássico", preco: 35, duracao_minutos: 30, ativo: true },
-  { id: 2, nome: "Barba completa", descricao: "Barba com toalha quente", preco: 25, duracao_minutos: 20, ativo: true },
-];
-
 export function ServicosPage() {
-  const [servicos, setServicos] = useState<Servico[]>(mockServicos);
-  const [loading] = useState(false);
+  const [servicos, setServicos] = useState<Servico[]>([]);
+  const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedServico, setSelectedServico] = useState<Servico | null>(null);
+  const didLoadOnce = useRef(false);
   const { getErrorMessage } = useApiError();
 
   const sortedServicos = useMemo(() => [...servicos].sort((a, b) => a.nome.localeCompare(b.nome)), [servicos]);
@@ -55,14 +51,36 @@ export function ServicosPage() {
     }
   }
 
-  async function handleRefreshFromApi() {
+  async function loadServicos() {
+    setLoading(true);
     try {
       const apiServicos = await listServicos();
       setServicos(apiServicos);
-    } catch {
-      // Mantém os dados mockados enquanto a API não estiver disponível.
+    } catch (error) {
+      window.alert(getErrorMessage(error));
+    } finally {
+      setLoading(false);
     }
   }
+
+  useEffect(() => {
+    if (didLoadOnce.current) {
+      return;
+    }
+    didLoadOnce.current = true;
+
+    void (async () => {
+      setLoading(true);
+      try {
+        const apiServicos = await listServicos();
+        setServicos(apiServicos);
+      } catch (error) {
+        window.alert(getErrorMessage(error));
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [getErrorMessage]);
 
   return (
     <div className="space-y-6">
@@ -73,7 +91,7 @@ export function ServicosPage() {
           <p className="mt-2 text-sm text-black/60">Cadastre, edite e organize os serviços oferecidos pela barbearia.</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="secondary" onClick={handleRefreshFromApi}>
+          <Button variant="secondary" onClick={loadServicos}>
             Atualizar da API
           </Button>
           <Button onClick={handleCreate}>

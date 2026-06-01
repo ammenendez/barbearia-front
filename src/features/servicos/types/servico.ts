@@ -1,5 +1,6 @@
 export type Servico = {
   id: number;
+  tipo: "barba" | "cabelo" | "bigode";
   nome: string;
   descricao: string | null;
   preco: number;
