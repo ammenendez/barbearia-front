@@ -1,6 +1,9 @@
 import { z } from "zod";
 
+const tipoServicoSchema = z.enum(["barba", "cabelo", "bigode"]);
+
 export const servicoSchema = z.object({
+  tipo: tipoServicoSchema,
   nome: z.string().min(2, "Informe um nome válido"),
   descricao: z.string().max(500).optional().nullable(),
   preco: z.coerce.number().positive("O preço deve ser maior que zero"),
